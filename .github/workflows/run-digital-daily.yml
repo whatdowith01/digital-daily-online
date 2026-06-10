@@ -1,0 +1,80 @@
+name: Run Digital Daily Workflow
+
+on:
+  workflow_dispatch: # GitHub 웹에서 버튼을 눌러 수동 실행할 수 있게 합니다.
+  schedule:
+    - cron: '0 23 * * 0-4' # (선택사항) 월~금 아침 배달을 위해 일~목 한국시간 오전 8시(UTC 23:00) 자동 실행
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 결과를 저장소에 push하기 위해 권한이 필요합니다.
+
+    steps:
+    - name: 저장소 코드 체크아웃
+      uses: actions/checkout@v4
+
+    - name: Python 환경 설정
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: 필요한 라이브러리 설치
+      run: |
+        pip install requests openai beautifulsoup4
+
+    - name: Codex 스킬 비즈니스 로직 실행
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }} # 보안이 필요한 API 키는 Secrets에 저장
+      run: |
+        # 명시된 워크플로우를 가상으로 수행하는 파이썬 실행 스크립트 예시입니다.
+        # 실제 프로젝트 구동 진입점 파일(예: main.py 등)이 있다면 아래 명령어를 수정하세요.
+        python -c "
+        import json, datetime
+        
+        # 1. format.md 및 SKILL 규칙 로드 가상 시뮬레이션 또는 실제 코드 실행부
+        # 여기에 기존 소스코드가 구동되는 핵심 명령을 배치합니다.
+        
+        # 예시 가상 결과물 생성 (실제 구현체 코드가 돌아가서 결과를 뽑아냈다고 가정)
+        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        sample_brief = (
+            '6월 10일 (수) 『디지털 데일리』 입니다.\n\n'
+            '(1) 금융권 Digital 현황\n'
+            '****************************\n'
+            '○ 신한은행, AI 에이전트 기반 내재화 혁신 가속도\n'
+            'https://news.naver.com/breakingnews/section/101/259\n'
+            '출처 : 전자신문\n'
+            '▶ 신한은행은 각 부서별 고유 업무를 지원하는 생성형 AI 기반의 \'수평적 에이전트(Horizontal Agents)\'의 전사 도입을 확대하고 있습니다. 이는 단순 인력 대체가 아닌 직원의 업무 전문성을 극대화하는 보조 도구로 활용되며, 연내 100개 이상의 부서별 에이전트 배포를 목표로 AX 거버넌스를 정립해 나가고 있습니다.\n\n'
+            '(2) 금융권 Digital 동향 및 정책\n'
+            '****************************\n'
+            '○ 금융위, 생성형 AI 활용 가이드라인 배포\n'
+            'https://news.naver.com/breakingnews/section/101/259\n'
+            '출처 : 금융위원회\n'
+            '▶ 금융당국은 내부망 내 SaaS 활용 규제를 완화하고 보안 통제를 명확히 한 금융권 망분리 개선안의 구체적 이행 지침을 전달했습니다.\n\n'
+            '(3) Digital 스터디 365\n'
+            '****************************\n'
+            '○ 요즘IT - LLM Agent 아키텍처와 금융권 적용 패러다임\n'
+            'https://yozm.wishket.com/magazine/detail/3696/\n'
+            '출처 : 요즘IT'
+        )
+        
+        # docs/data.json 구조 업데이트
+        output_data = {
+            'updated_at': now,
+            'daily_brief': sample_brief
+        }
+        
+        with open('docs/data.json', 'w', encoding='utf-8') as f:
+            json.dump(output_data, f, ensure_ascii=False, indent=2)
+        print('data.json 파일 갱신 완료')
+        "
+
+    - name: 변경된 결과물(data.json)을 GitHub 저장소에 자동 반영
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add docs/data.json
+        # 변경사항이 있을 때만 커밋
+        git diff-index --quiet HEAD || git commit -m "🤖 [자동 생성] 디지털 데일리 데이터 업데이트"
+        git push
