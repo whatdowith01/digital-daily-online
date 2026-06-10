@@ -1,0 +1,6 @@
+interface:
+  display_name: "디지털 데일리"
+  short_description: "뉴스 URL을 카드형 요약 리스트로 정리합니다"
+  default_prompt: "Use $digital-daily to summarize these news URLs into card-style Korean daily briefs."
+policy:
+  allow_implicit_invocation: true

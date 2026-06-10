@@ -1,0 +1,6 @@
+interface:
+  display_name: "디지털데일리 큐레이터"
+  short_description: "네이버 금융뉴스에서 디지털 관련 기사 후보만 선별합니다"
+  default_prompt: "Use $digital-daily-curator to curate digital finance news candidates from Naver News."
+policy:
+  allow_implicit_invocation: true
